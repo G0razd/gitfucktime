@@ -32,6 +32,10 @@ jobs:
     - name: Install from source
       run: pip install .
         
+    - name: Run Tests
+      run: |
+        python -m unittest discover tests
+
     - name: Verify installation
       run: |
         gitfucktime --version
