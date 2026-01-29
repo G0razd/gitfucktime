@@ -1,0 +1,27 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Distribution
+*.tar.gz
+*.whl
+
+# Environment
+.env
+venv/
+env/
+ENV/
+
+# OS/Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Project specific
+publishing_tutorial.md
+task.md
