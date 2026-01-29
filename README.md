@@ -26,7 +26,7 @@ Gaslight your boss, your colleagues, and even your future self into believing yo
 ## Prerequisites
 
 -   **Git**: You need to have `git` installed (duh).
--   **Python 3.6+**: Because we have standards.
+-   **Python 3.7+**: Because we have standards.
 
 ## Installation
 
