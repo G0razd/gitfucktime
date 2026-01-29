@@ -21,8 +21,8 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/yourusername/gitfucktime"
-"Bug Tracker" = "https://github.com/yourusername/gitfucktime/issues"
+"Homepage" = "https://github.com/G0razd/gitfucktime"
+"Bug Tracker" = "https://github.com/G0razd/gitfucktime/issues"
 
 [project.scripts]
 gitfucktime = "gitfucktime:main"
