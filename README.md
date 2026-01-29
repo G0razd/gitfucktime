@@ -1,6 +1,6 @@
-# gitfucktime
+# Git Fuck Time
 
-**gitfucktime** is a CLI utility to rewrite your git commit timestamps to make them look like they were done during "standard" work hours (09:00 - 17:00, Mon-Fri).
+`gitfucktime` is a CLI utility to rewrite your git commit timestamps to make them look like they were done during "standard" work hours (09:00 - 17:00, Mon-Fri).
 
 This is useful if you do a lot of coding late at night or on weekends but want your git history to reflect a standard 9-5 schedule.
 
