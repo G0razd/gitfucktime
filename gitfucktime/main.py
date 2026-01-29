@@ -226,7 +226,9 @@ Examples:
 
     timestamps.sort()
 
-    # Create mapping
+    # Create mapping: commits are in oldest->newest order (after reverse)
+    # Timestamps are in earliest->latest order (after sort)
+    # Direct assignment gives oldest commit -> earliest timestamp
     mapping = {}
     for i, commit in enumerate(commits):
         mapping[commit] = timestamps[i].strftime(TIME_FORMAT)
