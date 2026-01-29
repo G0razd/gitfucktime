@@ -17,6 +17,11 @@ Gaslight your boss, your colleagues, and even your future self into believing yo
 -   **Smart Detection**: Automatically picks up where you left off. It looks at your last pushed commit and starts falsifying... er, *correcting*... timestamps from the very next workday.
 -   **Interactive Dashboard**: Run it without arguments to see a pretty summary of your shame (unpushed commits) and fix them with one click.
 
+## prerequisites
+
+-   **Git**: You need to have `git` installed (duh).
+-   **Python 3.6+**: Because we have standards.
+
 ## installation
 
 ```bash
