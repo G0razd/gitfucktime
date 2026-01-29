@@ -19,6 +19,17 @@ try:
 except ImportError:
     QUESTIONARY_INSTALLED = False
 
+def confirm_action(message):
+    '''Prompts user to confirm a potentially risky action.'''
+    if QUESTIONARY_INSTALLED:
+        return questionary.confirm(message, default=False).ask()
+    elif RICH_INSTALLED:
+        from rich.prompt import Confirm
+        return Confirm.ask(message, default=False)
+    else:
+        response = input(f"{message} (y/N): ").strip().lower()
+        return response in ['y', 'yes']
+
 def main():
     parser = argparse.ArgumentParser(
         description="Rewrite git commit dates to spread them over a time frame",
@@ -47,7 +58,7 @@ Examples:
                         help="Only rewrite last N commits (from HEAD going back)")
     parser.add_argument("-f", "--first", type=int, metavar="N",
                         help="Only rewrite first N commits (from oldest going forward)")
-    parser.add_argument("-v", "--version", action="version", version="gitfucktime 1.0.0",
+    parser.add_argument("-v", "--version", action="version", version="gitfucktime 1.0.1",
                         help="Show program's version number and exit")
 
     args = parser.parse_args()
@@ -178,10 +189,40 @@ Examples:
         print("No commits to process.")
         return
 
+    # Get current time for validation
+    now = datetime.datetime.now()
+    
+    # Check for future dates
+    if end_date > now:
+        # If user explicitly provided end date or interactive custom input
+        if args.end or (not args.unpushed and not args.last and not args.first):
+            print(f"\n[WARNING] End date ({end_date.strftime(DATE_FORMAT)}) is in the future.")
+            print(f"Current time: {now.strftime('%Y-%m-%d %H:%M:%S')}")
+            if not confirm_action("Do you really want to create commits in the future?"):
+                print("Operation cancelled.")
+                return
+        else:
+            # Auto-calculated: cap at now
+            print(f"\n[INFO] Auto-calculated end date was in the future. Capping at current time.")
+            end_date = now
+            if start_date > end_date:
+                print("Error: Start date is after current time. Cannot proceed.")
+                return
+    
+    # Check if start date is before parent commit
+    if revision_range_start:
+        parent_date = get_commit_date(revision_range_start)
+        if parent_date and start_date < parent_date:
+            print(f"\n[WARNING] Start date ({start_date.strftime(DATE_FORMAT)}) is before the parent commit date ({parent_date.strftime('%Y-%m-%d %H:%M:%S')}).")
+            print("This may create a messy or confusing git history.")
+            if not confirm_action("Do you really want to proceed?"):
+                print("Operation cancelled.")
+                return
+
     print("Generating timestamps...")
     timestamps = []
     for _ in range(len(commits)):
-        timestamps.append(generate_work_hours_timestamp(start_date, end_date))
+        timestamps.append(generate_work_hours_timestamp(start_date, end_date, max_time=now))
 
     timestamps.sort()
 
@@ -201,7 +242,7 @@ Examples:
     print(f"Filter script created: {filter_file}")
     
     # Run filter branch
-    run_filter_branch(commits, filter_file, args)
+    run_filter_branch(commits, filter_file, args, revision_range_start)
     
     # Cleanup
     if os.path.exists(filter_file):

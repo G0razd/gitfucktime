@@ -15,8 +15,14 @@ def is_work_day(date):
     '''Returns True if date is Monday-Friday.'''
     return date.weekday() < 5
 
-def generate_work_hours_timestamp(start_date, end_date):
-    '''Generates a random timestamp within work hours (09:00-17:00) on a work day.'''
+def generate_work_hours_timestamp(start_date, end_date, max_time=None):
+    '''Generates a random timestamp within work hours (09:00-17:00) on a work day.
+    
+    Args:
+        start_date: Start of the date range
+        end_date: End of the date range
+        max_time: Optional maximum datetime limit (to prevent future commits)
+    '''
     total_days = (end_date - start_date).days + 1
 
     while True:
@@ -28,4 +34,15 @@ def generate_work_hours_timestamp(start_date, end_date):
             minute = random.randint(0, 59)
             second = random.randint(0, 59)
             result = target_date.replace(hour=hour, minute=minute, second=second)
+            
+            # Clamp to max_time if provided and result exceeds it
+            if max_time and result > max_time:
+                # If this is today, cap at max_time; otherwise try again
+                if target_date.date() == max_time.date():
+                    # Use max_time's hour/minute/second if we're on the same day
+                    result = max_time
+                else:
+                    # Don't use dates beyond max_time
+                    continue
+                    
             return result

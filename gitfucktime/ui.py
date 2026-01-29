@@ -22,10 +22,12 @@ def interactive_mode():
     grid.add_column(justify="center", ratio=1)
     grid.add_column(justify="center", ratio=1)
     grid.add_column(justify="center", ratio=1)
+    grid.add_column(justify="center", ratio=1)
     
     # Add stats to grid
     grid.add_row(
         Panel(f"[bold green]{stats['unpushed_commits']}[/bold green]", title="Unpushed Commits", border_style="green"),
+        Panel(f"[bold cyan]{stats['last_pushed_commit']}[/bold cyan]", title="Last Pushed Commit", border_style="cyan"),
         Panel(f"[bold blue]{stats['total_commits']}[/bold blue]", title="Total Commits", border_style="blue"),
         Panel(f"[bold yellow]{stats['last_commit']}[/bold yellow]", title="Last Commit", border_style="yellow")
     )

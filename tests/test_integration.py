@@ -89,5 +89,70 @@ class TestIntegration(unittest.TestCase):
         except subprocess.CalledProcessError as e:
             self.fail(f"Tool execution failed: {e}")
 
+    def test_unpushed_mode_only_rewrites_unpushed(self):
+        """Test that --unpushed mode only rewrites commits after origin/master, not entire history"""
+        try:
+            # Create a "remote" bare repository
+            remote_dir = tempfile.mkdtemp()
+            subprocess.check_call(["git", "init", "--bare", remote_dir], stdout=subprocess.DEVNULL)
+            
+            # Add remote and push ONLY the first commit
+            subprocess.check_call(["git", "remote", "add", "origin", remote_dir], stdout=subprocess.DEVNULL)
+            subprocess.check_call(["git", "branch", "-M", "master"], stdout=subprocess.DEVNULL)
+            subprocess.check_call(["git", "push", "-u", "origin", "HEAD~1:refs/heads/master"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            
+            # Now HEAD~1 is pushed, HEAD is unpushed
+            # Get dates before rewrite
+            first_commit_date_before = subprocess.check_output(
+                ["git", "show", "-s", "--format=%cd", "--date=iso-strict", "HEAD~1"]
+            ).decode("utf-8").strip()
+            
+            second_commit_date_before = subprocess.check_output(
+                ["git", "show", "-s", "--format=%cd", "--date=iso-strict", "HEAD"]
+            ).decode("utf-8").strip()
+            
+            print(f"\nBefore rewrite:")
+            print(f"  First commit (pushed):   {first_commit_date_before}")
+            print(f"  Second commit (unpushed): {second_commit_date_before}")
+            
+            # Run gitfucktime in unpushed mode
+            cmd = [sys.executable, "-m", "gitfucktime.main", "--unpushed", "--start", "2023-11-01", "--end", "2023-11-03"]
+            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            print(f"\nGitfucktime output:\n{result.stdout}\n{result.stderr}")
+            
+            # Get dates after rewrite
+            first_commit_date_after = subprocess.check_output(
+                ["git", "show", "-s", "--format=%cd", "--date=iso-strict", "HEAD~1"]
+            ).decode("utf-8").strip()
+            
+            second_commit_date_after = subprocess.check_output(
+                ["git", "show", "-s", "--format=%cd", "--date=iso-strict", "HEAD"]
+            ).decode("utf-8").strip()
+            
+            print(f"\nAfter rewrite:")
+            print(f"  First commit (pushed):   {first_commit_date_after}")
+            print(f"  Second commit (unpushed): {second_commit_date_after}")
+            
+            # Verify: First commit should have the SAME date (not rewritten)
+            self.assertEqual(first_commit_date_before, first_commit_date_after,
+                           "First (pushed) commit date should NOT have changed in --unpushed mode")
+            
+            # Verify: Second commit should have a DIFFERENT date (rewritten)
+            self.assertNotEqual(second_commit_date_before, second_commit_date_after,
+                              "Second (unpushed) commit date SHOULD have changed")
+            
+            # Verify second commit is now in the correct date range
+            second_dt = datetime.datetime.fromisoformat(second_commit_date_after.replace('+', ' +').split()[0])
+            self.assertGreaterEqual(second_dt.date(), datetime.date(2023, 11, 1))
+            self.assertLessEqual(second_dt.date(), datetime.date(2023, 11, 3))
+            
+            # Cleanup remote
+            shutil.rmtree(remote_dir, ignore_errors=True)
+            
+        except subprocess.CalledProcessError as e:
+            print(f"\nSubprocess error: {e}")
+            print(f"Output: {e.output if hasattr(e, 'output') else 'N/A'}")
+            self.fail(f"Unpushed mode test failed: {e}")
+
 if __name__ == '__main__':
     unittest.main()
