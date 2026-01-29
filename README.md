@@ -1,7 +1,7 @@
 # Git Fuck Time
 
 <p align="center">
-  <img src="logo.png" alt="Git Fuck Time Logo" width="300">
+  <img src="https://github.com/G0razd/gitfucktime/raw/master/logo.png" alt="Git Fuck Time Logo" width="300">
 </p>
 
 **Because nobody needs to know you were debugging CSS at 3 AM on a Saturday.**
