@@ -4,6 +4,12 @@
   <img src="https://github.com/G0razd/gitfucktime/raw/master/logo.png" alt="Git Fuck Time Logo" width="300">
 </p>
 
+<p align="center">
+  <a href="https://pypi.org/project/gitfucktime/">
+    <img src="https://img.shields.io/pypi/v/gitfucktime.svg" alt="PyPI version">
+  </a>
+</p>
+
 **Because nobody needs to know you were debugging CSS at 3 AM on a Saturday.**
 
 `gitfucktime` is a CLI utility that scrubs your git commit timestamps and spreads them out over a healthy, respectable 9-5, Monday-to-Friday schedule. 
