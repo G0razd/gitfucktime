@@ -10,19 +10,19 @@
 
 Gaslight your boss, your colleagues, and even your future self into believing you have a perfect work-life balance.
 
-## features
+## Features
 
 -   **9-to-5 Only**: Automatically shifts commits to "standard" business hours (09:00 - 17:00).
 -   **No Weekends**: Skips Saturdays and Sundays, because you definitely have a life outside of work.
 -   **Smart Detection**: Automatically picks up where you left off. It looks at your last pushed commit and starts falsifying... er, *correcting*... timestamps from the very next workday.
 -   **Interactive Dashboard**: Run it without arguments to see a pretty summary of your shame (unpushed commits) and fix them with one click.
 
-## prerequisites
+## Prerequisites
 
 -   **Git**: You need to have `git` installed (duh).
 -   **Python 3.6+**: Because we have standards.
 
-## installation
+## Installation
 
 ```bash
 pip install gitfucktime
@@ -30,7 +30,7 @@ pip install gitfucktime
 
 Congratulations, you are now a "morning person".
 
-## usage
+## Usage
 
 ### 1. The "I Just Woke Up and Fixed This" Mode (Recommended)
 Automatically detects your unpushed commits and spreads them out starting from the next logical work day after your last push.
@@ -57,7 +57,7 @@ Manually specify the exact dates you want your work to appear in. We won't judge
 gitfucktime --start 2025-01-01 --end 2025-01-10
 ```
 
-## cli reference
+## CLI Reference
 
 | Flag | Short | What it does |
 | :--- | :--- | :--- |

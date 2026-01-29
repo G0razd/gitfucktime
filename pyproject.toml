@@ -18,6 +18,7 @@ classifiers = [
 ]
 dependencies = [
     "rich",
+    "questionary",
 ]
 
 [project.urls]
@@ -25,4 +26,4 @@ dependencies = [
 "Bug Tracker" = "https://github.com/G0razd/gitfucktime/issues"
 
 [project.scripts]
-gitfucktime = "gitfucktime:main"
+gitfucktime = "gitfucktime.main:main"
