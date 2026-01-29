@@ -63,9 +63,31 @@ def get_commit_history(count=None):
     except subprocess.CalledProcessError:
         return []
 
+def get_upstream_branch():
+    '''Tries to get the upstream branch for HEAD, falling back to origin/master or origin/main.'''
+    try:
+        # Try to get configured upstream
+        upstream = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "@{u}"], stderr=subprocess.DEVNULL).decode("utf-8").strip()
+        if upstream:
+            return upstream
+    except:
+        pass
+        
+    # Fallbacks
+    for fallback in ["origin/master", "origin/main"]:
+        try:
+            subprocess.check_call(["git", "rev-parse", "--verify", fallback], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return fallback
+        except:
+            continue
+            
+    return "origin/master" # Final fallback
+
 def get_repo_stats():
     '''Gathers stats for the interactive dashboard.'''
     stats = {}
+    
+    upstream = get_upstream_branch()
     
     # Total commits
     try:
@@ -75,7 +97,7 @@ def get_repo_stats():
 
     # Unpushed commits
     try:
-        stats['unpushed_commits'] = int(subprocess.check_output(["git", "rev-list", "--count", "origin/master..HEAD"], stderr=subprocess.DEVNULL).decode("utf-8").strip())
+        stats['unpushed_commits'] = int(subprocess.check_output(["git", "rev-list", "--count", f"{upstream}..HEAD"], stderr=subprocess.DEVNULL).decode("utf-8").strip())
     except:
         stats['unpushed_commits'] = 0
 
@@ -89,8 +111,8 @@ def get_repo_stats():
     
     # Last pushed commit (before unpushed)
     try:
-        # Get the merge base with origin/master (last commit that was pushed)
-        last_pushed_hash = subprocess.check_output(["git", "merge-base", "origin/master", "HEAD"], stderr=subprocess.DEVNULL).decode("utf-8").strip()
+        # Get the merge base with upstream (last commit that was pushed)
+        last_pushed_hash = subprocess.check_output(["git", "merge-base", upstream, "HEAD"], stderr=subprocess.DEVNULL).decode("utf-8").strip()
         last_pushed_date = subprocess.check_output(["git", "show", "-s", "--format=%cd", "--date=short", last_pushed_hash]).decode("utf-8").strip()
         last_pushed_short_hash = subprocess.check_output(["git", "show", "-s", "--format=%h", last_pushed_hash]).decode("utf-8").strip()
         stats['last_pushed_commit'] = f"{last_pushed_short_hash} ({last_pushed_date})"
@@ -98,6 +120,27 @@ def get_repo_stats():
         stats['last_pushed_commit'] = "N/A"
         
     return stats
+
+# ... (skip generate_filter_script and run_filter_branch) ...
+
+def check_branch_divergence():
+    '''Check if branch has diverged significantly from remote'''
+    upstream = get_upstream_branch()
+    try:
+        # Get ahead/behind counts
+        ahead = int(subprocess.check_output(
+            ["git", "rev-list", "--count", f"{upstream}..HEAD"],
+            stderr=subprocess.DEVNULL
+        ).decode().strip())
+        
+        behind = int(subprocess.check_output(
+            ["git", "rev-list", "--count", f"HEAD..{upstream}"],
+            stderr=subprocess.DEVNULL
+        ).decode().strip())
+        
+        return {"ahead": ahead, "behind": behind}
+    except:
+        return None
 
 def generate_filter_script(mapping):
     '''Generates the content of the git filter-branch script.'''
@@ -223,15 +266,16 @@ def revert_last_operation(no_backup=False):
 
 def check_branch_divergence():
     '''Check if branch has diverged significantly from remote'''
+    upstream = get_upstream_branch()
     try:
         # Get ahead/behind counts
         ahead = int(subprocess.check_output(
-            ["git", "rev-list", "--count", "origin/master..HEAD"],
+            ["git", "rev-list", "--count", f"{upstream}..HEAD"],
             stderr=subprocess.DEVNULL
         ).decode().strip())
         
         behind = int(subprocess.check_output(
-            ["git", "rev-list", "--count", "HEAD..origin/master"],
+            ["git", "rev-list", "--count", f"HEAD..{upstream}"],
             stderr=subprocess.DEVNULL
         ).decode().strip())
         
