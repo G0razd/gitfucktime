@@ -47,7 +47,7 @@ Examples:
                         help="Only rewrite last N commits (from HEAD going back)")
     parser.add_argument("-f", "--first", type=int, metavar="N",
                         help="Only rewrite first N commits (from oldest going forward)")
-    parser.add_argument("-v", "--version", action="version", version="gitfucktime 0.1.0",
+    parser.add_argument("-v", "--version", action="version", version="gitfucktime 1.0.0",
                         help="Show program's version number and exit")
 
     args = parser.parse_args()
