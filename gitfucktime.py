@@ -7,6 +7,16 @@ import random
 import json
 import argparse
 
+try:
+    from rich.console import Console
+    from rich.panel import Panel
+    from rich.table import Table
+    from rich.prompt import Prompt
+    from rich import print as rprint
+    RICH_INSTALLED = True
+except ImportError:
+    RICH_INSTALLED = False
+
 DATE_FORMAT = "%Y-%m-%d"
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
@@ -70,6 +80,79 @@ def generate_work_hours_timestamp(start_date, end_date):
             result = target_date.replace(hour=hour, minute=minute, second=second)
             return result
 
+            return result
+
+def get_repo_stats():
+    '''Gathers stats for the interactive dashboard.'''
+    stats = {}
+    
+    # Total commits
+    try:
+        stats['total_commits'] = int(subprocess.check_output(["git", "rev-list", "--count", "HEAD"]).decode("utf-8").strip())
+    except:
+        stats['total_commits'] = 0
+
+    # Unpushed commits
+    try:
+        stats['unpushed_commits'] = int(subprocess.check_output(["git", "rev-list", "--count", "origin/master..HEAD"], stderr=subprocess.DEVNULL).decode("utf-8").strip())
+    except:
+        stats['unpushed_commits'] = 0
+
+    # Last commit info
+    try:
+        last_commit_date = subprocess.check_output(["git", "show", "-s", "--format=%cd", "--date=short", "HEAD"]).decode("utf-8").strip()
+        last_commit_hash = subprocess.check_output(["git", "show", "-s", "--format=%h", "HEAD"]).decode("utf-8").strip()
+        stats['last_commit'] = f"{last_commit_hash} ({last_commit_date})"
+    except:
+        stats['last_commit'] = "Unknown"
+        
+    return stats
+
+def interactive_mode():
+    '''Runs the interactive dashboard.'''
+    if not RICH_INSTALLED:
+        print("Error: 'rich' library not found. Please install it: pip install rich")
+        return
+
+    console = Console()
+    stats = get_repo_stats()
+
+    # Create Dashboard
+    grid = Table.grid(expand=True)
+    grid.add_column(justify="center", ratio=1)
+    grid.add_column(justify="center", ratio=1)
+    grid.add_column(justify="center", ratio=1)
+    
+    # Add stats to grid
+    # Using Panel for each stat to look like "cards"
+    grid.add_row(
+        Panel(f"[bold green]{stats['unpushed_commits']}[/bold green]", title="Unpushed Commits", border_style="green"),
+        Panel(f"[bold blue]{stats['total_commits']}[/bold blue]", title="Total Commits", border_style="blue"),
+        Panel(f"[bold yellow]{stats['last_commit']}[/bold yellow]", title="Last Commit", border_style="yellow")
+    )
+
+    console.print("\n")
+    console.print(Panel(grid, title="[bold magenta]Git Fuck Time Dashboard[/bold magenta]", border_style="magenta"))
+    console.print("\n")
+
+    # Menu
+    rprint("[bold]Select an action:[/bold]")
+    rprint("  • [cyan]Auto-Spread Unpushed[/cyan] (Detects parent date automatically)")
+    rprint("  • [cyan]Custom Range[/cyan] (Enter start/end dates manually)")
+    rprint("  • [red]Quit[/red]")
+    
+    choice = Prompt.ask("\n[bold]>[/bold]", choices=["auto", "custom", "quit", "a", "c", "q"], default="auto")
+
+    if choice in ["quit", "q"]:
+        console.print("[red]Exiting...[/red]")
+        sys.exit(0)
+    
+    elif choice in ["auto", "a"]:
+        return "unpushed"
+        
+    elif choice in ["custom", "c"]:
+        return "custom"
+
 def main():
     parser = argparse.ArgumentParser(
         description="Rewrite git commit dates to spread them over a time frame",
@@ -102,6 +185,27 @@ Examples:
                         help="Show program's version number and exit")
 
     args = parser.parse_args()
+
+    # Interactive Mode Trigger
+    if not any(vars(args).values()):  # No arguments provided
+        if RICH_INSTALLED:
+            mode = interactive_mode()
+            if mode == "unpushed":
+                args.unpushed = True
+            elif mode == "custom":
+                # Ask for inputs
+                start_str = Prompt.ask("Enter start date [dim](YYYY-MM-DD)[/dim]")
+                end_str = Prompt.ask("Enter end date [dim](YYYY-MM-DD, optional)[/dim]", default="")
+                args.start = start_str
+                if end_str:
+                    args.end = end_str
+        else:
+             print("Install 'rich' for interactive mode: pip install rich")
+             # Fallback to old behavior? Or just print help?
+             parser.print_help()
+             return
+
+    print("\n=== Git Fuck Time ===")
 
     print("=== Git Time Spreader (gitfucktime) ===")
     print("This script will rewrite your git history to spread commits over a time frame.")
