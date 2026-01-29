@@ -21,7 +21,11 @@ Gaslight your boss, your colleagues, and even your future self into believing yo
 -   **9-to-5 Only**: Automatically shifts commits to "standard" business hours (09:00 - 17:00).
 -   **No Weekends**: Skips Saturdays and Sundays, because you definitely have a life outside of work.
 -   **Smart Detection**: Automatically picks up where you left off. It looks at your last pushed commit and starts falsifying... er, *correcting*... timestamps from the very next workday.
--   **Interactive Dashboard**: Run it without arguments to see a pretty summary of your shame (unpushed commits) and fix them with one click.
+-   **Interactive Dashboard**: Run it without arguments to see a summary of unpushed commits, view history, or revert changes.
+-   **View History**: See your commit history formatted nicely in the terminal.
+-   **Undo Button**: Made a mistake? Use `--revert` to undo the last operation.
+-   **Safety First**: Automatic backup branches are created before every operation.
+-   **Divergence Warnings**: Warns you if your branch has significantly diverged from `origin/master`.
 
 ## Prerequisites
 
@@ -63,6 +67,19 @@ Manually specify the exact dates you want your work to appear in. We won't judge
 gitfucktime --start 2025-01-01 --end 2025-01-10
 ```
 
+### 4. Other Utilities
+
+```bash
+# View commit history
+gitfucktime --view
+
+# Revert the last operation
+gitfucktime --revert
+
+# Skip backup creation
+gitfucktime --start 2025-01-01 --no-backup
+```
+
 ## CLI Reference
 
 | Flag | Short | What it does |
@@ -72,6 +89,9 @@ gitfucktime --start 2025-01-01 --end 2025-01-10
 | `--unpushed`| `-u` | Only fixes commits you haven't exposed to the public yet. |
 | `--last N` | `-l` | Fixes the last N commits. |
 | `--first N` | `-f` | Fixes the first N commits (for fresh repos). |
+| `--view` | `-V` | View commit history and exit. |
+| `--revert` | | Revert the last operation. |
+| `--no-backup` | | Skip creating a backup branch. |
 | `--version` | `-v` | Version info. |
 | `--help` | `-h` | Shows the help menu. |
 

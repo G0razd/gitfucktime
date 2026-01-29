@@ -1,0 +1,23 @@
+test_display_commit_history_no_commits (tests.test_ui.TestUI.test_display_commit_history_no_commits)
+Test that display_commit_history handles empty commit list. ... ok
+test_display_commit_history_with_commits (tests.test_ui.TestUI.test_display_commit_history_with_commits)
+Test that display_commit_history sets up the pager correctly when commits exist. ... FAIL
+
+======================================================================
+FAIL: test_display_commit_history_with_commits (tests.test_ui.TestUI.test_display_commit_history_with_commits)
+Test that display_commit_history sets up the pager correctly when commits exist.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.2544.0_x64__qbz5n2kfra8p0\Lib\unittest\mock.py", line 1426, in patched
+    return func(*newargs, **newkeywargs)
+  File "C:\Users\Lenovo\Documents\Projects\gitfucktime\tests\test_ui.py", line 32, in test_display_commit_history_with_commits
+    mock_console.print.assert_called()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.2544.0_x64__qbz5n2kfra8p0\Lib\unittest\mock.py", line 948, in assert_called
+    raise AssertionError(msg)
+AssertionError: Expected 'print' to have been called.
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.007s
+
+FAILED (failures=1)
