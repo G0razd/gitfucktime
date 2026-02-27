@@ -3,7 +3,7 @@ import os
 import argparse
 import datetime
 import subprocess
-from .core import get_commits, get_commit_date, generate_filter_script, run_filter_branch, get_commit_history, revert_last_operation, create_backup_branch, check_branch_divergence
+from .core import get_commits, get_commit_date, generate_filter_script, run_filter_branch, get_commit_history, revert_last_operation, create_backup_branch, check_branch_divergence, get_upstream_branch
 from .utils import get_next_work_day, generate_work_hours_timestamp, DATE_FORMAT, TIME_FORMAT
 from .ui import interactive_mode, display_commit_history
 
@@ -86,7 +86,7 @@ Examples:
     parser.add_argument("-s", "--start", help="Start date (YYYY-MM-DD)")
     parser.add_argument("-e", "--end", help="End date (YYYY-MM-DD)")
     parser.add_argument("-u", "--unpushed", action="store_true",
-                        help="Only rewrite commits not pushed to origin/master")
+                        help="Only rewrite commits not pushed to upstream branch")
     parser.add_argument("-l", "--last", type=int, metavar="N",
                         help="Only rewrite last N commits (from HEAD going back)")
     parser.add_argument("-f", "--first", type=int, metavar="N",
@@ -97,7 +97,7 @@ Examples:
                         help="Revert the last gitfucktime operation")
     parser.add_argument("--no-backup", action="store_true",
                         help="Skip creating a backup branch before operation")
-    parser.add_argument("-v", "--version", action="version", version="gitfucktime 1.1.0",
+    parser.add_argument("-v", "--version", action="version", version="gitfucktime 1.1.1",
                         help="Show program's version number and exit")
 
     args = parser.parse_args()
@@ -216,11 +216,12 @@ Examples:
             print_info(f"Found {len(commits)} {scope}commits.")
             
             if args.unpushed:
-                # Parent is origin/master
+                # Parent is upstream branch
+                upstream = get_upstream_branch()
                 try:
-                    revision_range_start = subprocess.check_output(["git", "merge-base", "origin/master", "HEAD"]).decode('utf-8').strip()
+                    revision_range_start = subprocess.check_output(["git", "merge-base", upstream, "HEAD"]).decode('utf-8').strip()
                 except:
-                    print_warning("Could not determine merge base with origin/master.")
+                    print_warning(f"Could not determine merge base with {upstream}.")
     except Exception as e:
         if status_ctx: status_ctx.stop()
         print_error(f"Failed to fetch commits: {e}")
@@ -333,7 +334,7 @@ Examples:
         ahead = divergence['ahead']
         behind = divergence['behind']
         if ahead > 50 or behind > 50:
-            print_warning("Branch significantly diverged from origin/master!")
+            print_warning(f"Branch significantly diverged from {get_upstream_branch()}!")
             print_info(f"  - Ahead by: {ahead} commits")
             print_info(f"  - Behind by: {behind} commits")
             print_warning("Rewriting history on a diverged branch can cause conflicts.")

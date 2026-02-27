@@ -6,13 +6,14 @@ from .utils import TIME_FORMAT
 def get_commits(count=None, unpushed_only=False, reverse_order=False):
     '''Returns a list of commit hashes.'''
     if unpushed_only:
+        upstream = get_upstream_branch()
         try:
             result = subprocess.check_output(
-                ["git", "rev-list", "origin/master..HEAD"],
+                ["git", "rev-list", f"{upstream}..HEAD"],
                 stderr=subprocess.DEVNULL
             ).decode("utf-8")
         except subprocess.CalledProcessError:
-            print("Warning: Could not find origin/master, using all commits on HEAD")
+            print(f"Warning: Could not find {upstream}, using all commits on HEAD")
             result = subprocess.check_output(["git", "rev-list", "HEAD"]).decode("utf-8")
     else:
         result = subprocess.check_output(["git", "rev-list", "HEAD"]).decode("utf-8")
