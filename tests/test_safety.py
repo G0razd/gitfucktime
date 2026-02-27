@@ -7,6 +7,17 @@ from tests.test_base import GitfucktimeTestCase
 
 class TestSafetyFeatures(GitfucktimeTestCase):
     
+    def tearDown(self):
+        """Clean up backup branches created during tests."""
+        try:
+            branches = subprocess.check_output(["git", "branch"]).decode("utf-8").splitlines()
+            for branch in branches:
+                branch_name = branch.strip().lstrip("* ")
+                if branch_name.startswith("gitfucktime-backup-"):
+                    subprocess.call(["git", "branch", "-D", branch_name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception:
+            pass
+        super().tearDown()
     def test_backup_creation(self):
         """Test that a backup branch is created by default."""
         # 1. Run gitfucktime
